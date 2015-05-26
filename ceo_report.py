@@ -54,6 +54,7 @@ class CEOReport(ReportWebkit):
         ShipmentOut = Pool().get('stock.shipment.out')
         Inventory = Pool().get('stock.inventory')
         Production = Pool().get('production')
+        Company = Pool().get('company.company')
 
         sales = Sale.search([
             ('state', 'in', ['confirmed', 'processing', 'done']),
@@ -79,7 +80,7 @@ class CEOReport(ReportWebkit):
             ('effective_date', '<=', data.get('end_date').date()),
             ('state', '=', 'done'),
         ], count=True)
-
+        company_id = Transaction().context.get('company')
         localcontext.update({
             'sales': sales,
             'shipments': shipments,
@@ -89,7 +90,8 @@ class CEOReport(ReportWebkit):
             'sale_has_salesman': hasattr(Sale, 'employee'),
             'sale_has_channel': hasattr(Sale, 'channel'),
             'get_sales_by_salesman_data': cls.get_sales_by_salesman_data,
-            'get_sales_by_channel_data': cls.get_sales_by_channel_data
+            'get_sales_by_channel_data': cls.get_sales_by_channel_data,
+            'company': Company(company_id),
         })
         return super(CEOReport, cls).parse(
             report, records, data, localcontext
